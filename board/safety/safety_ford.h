@@ -13,6 +13,8 @@
 #define FORD_MAIN_BUS 0U
 #define FORD_CAM_BUS  2U
 
+const int FORD_FLAG_CANFD = 1;
+
 const CanMsg FORD_TX_MSGS[] = {
   {MSG_Steering_Data_FD1, 0, 8},
   {MSG_Steering_Data_FD1, 2, 8},
@@ -161,7 +163,7 @@ static int ford_fwd_hook(int bus_num, CANPacket_t *to_fwd) {
 }
 
 static const addr_checks* ford_init(uint16_t param) {
-  UNUSED(param);
+  ford_canfd = GET_FLAG(param, FORD_FLAG_CANFD);
 
   return &ford_rx_checks;
 }

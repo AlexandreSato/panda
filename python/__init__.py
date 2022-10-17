@@ -228,6 +228,8 @@ class Panda:
   FLAG_GM_HW_CAM = 1
   FLAG_GM_HW_CAM_LONG = 2
 
+  FLAG_FORD_CANFD = 1
+
   def __init__(self, serial: Optional[str] = None, claim: bool = True, spi: bool = False, disable_checks: bool = True):
     self._serial = serial
     self._disable_checks = disable_checks
