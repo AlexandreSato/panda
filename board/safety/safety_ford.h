@@ -6,6 +6,7 @@
 #define MSG_ACCDATA_3             0x18A   // TX by OP, ACC/TJA user interface
 #define MSG_Lane_Assist_Data1     0x3CA   // TX by OP, Lane Keep Assist
 #define MSG_LateralMotionControl  0x3D3   // TX by OP, Traffic Jam Assist
+#define MSG_LateralMotionControl2 0x3D6   // TX by OP, BlueCruise
 #define MSG_IPMA_Data             0x3D8   // TX by OP, IPMA and LKAS user interface
 
 // CAN bus numbers.
@@ -18,6 +19,7 @@ const CanMsg FORD_TX_MSGS[] = {
   {MSG_ACCDATA_3, 0, 8},
   {MSG_Lane_Assist_Data1, 0, 8},
   {MSG_LateralMotionControl, 0, 8},
+  {MSG_LateralMotionControl2, 0, 8},
   {MSG_IPMA_Data, 0, 8},
 };
 #define FORD_TX_LEN (sizeof(FORD_TX_MSGS) / sizeof(FORD_TX_MSGS[0]))
@@ -30,11 +32,14 @@ AddrCheckStruct ford_addr_checks[] = {
 #define FORD_ADDR_CHECK_LEN (sizeof(ford_addr_checks) / sizeof(ford_addr_checks[0]))
 addr_checks ford_rx_checks = {ford_addr_checks, FORD_ADDR_CHECK_LEN};
 
+bool ford_canfd = false;
+
 
 static bool ford_lkas_msg_check(int addr) {
   return (addr == MSG_ACCDATA_3)
       || (addr == MSG_Lane_Assist_Data1)
       || (addr == MSG_LateralMotionControl)
+      || (addr == MSG_LateralMotionControl2)
       || (addr == MSG_IPMA_Data);
 }
 
