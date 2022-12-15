@@ -84,7 +84,6 @@ static int ford_rx_hook(CANPacket_t *to_push) {
 }
 
 static int ford_tx_hook(CANPacket_t *to_send) {
-
   int tx = 1;
   int addr = GET_ADDR(to_send);
 
@@ -94,7 +93,7 @@ static int ford_tx_hook(CANPacket_t *to_send) {
 
   // Safety check for Steering_Data_FD1 button signals
   // Note: Many other signals in this message are not relevant to safety (e.g. blinkers, wiper switches, high beam)
-  // which we passthru in OP.
+  // which we passthrough in OP.
   if (addr == MSG_Steering_Data_FD1) {
     // Violation if resume button is pressed while controls not allowed, or
     // if cancel button is pressed when cruise isn't engaged.
