@@ -131,6 +131,18 @@ static int ford_tx_hook(CANPacket_t *to_send) {
     }
   }
 
+  // Safety check for LateralMotionControl2 action
+  if (addr == MSG_LateralMotionControl2) {
+    // Signal: LatCtl_D2_Rq
+    unsigned int steer_control_type = (GET_BYTE(to_send, 0) >> 4) & 0x7U;
+    bool steer_control_enabled = steer_control_type != 0U;
+
+    // No steer control allowed when controls are not allowed
+    if (!controls_allowed && steer_control_enabled) {
+      tx = 0;
+    }
+  }
+
   // 1 allows the message through
   return tx;
 }
