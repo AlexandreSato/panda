@@ -253,7 +253,7 @@ static int toyota_tx_hook(CANPacket_t *to_send) {
 
     // Brake Hold
     if (addr == 0x344) {
-      if(vehicle_moving || gas_pressed)
+      if(vehicle_moving || gas_pressed || !acc_main_on)
         tx = 0;
     }
   }
@@ -288,7 +288,7 @@ static int toyota_fwd_hook(int bus_num, int addr) {
     // in TSS2, 0x191 is LTA which we need to block to avoid controls collision
     int is_lkas_msg = ((addr == 0x2E4) || (addr == 0x412) || (addr == 0x191));
     // in TSS2 the camera does ACC as well, so filter 0x343
-    int is_acc_msg = (addr == 0x343 || (addr == 0x344 && !vehicle_moving)); // TODO Refactor this 0x344 shit
+    int is_acc_msg = (addr == 0x343 || (addr == 0x344 && !vehicle_moving && acc_main_on)); // TODO Refactor this 0x344 shit
     int block_msg = is_lkas_msg || (is_acc_msg && !toyota_stock_longitudinal);
     if (!block_msg) {
       bus_fwd = 0;
