@@ -200,7 +200,7 @@ static bool toyota_tx_hook(const CANPacket_t *to_send) {
 
       bool violation = false;
       violation |= longitudinal_accel_checks(desired_accel, TOYOTA_LONG_LIMITS);
-      violation |= toyota_secoc; // SecOC cars move this signal to 0x183
+      violation |= toyota_secoc && (desired_accel != TOYOTA_LONG_LIMITS.inactive_accel); // SecOC cars move this signal to 0x183
 
       // only ACC messages that cancel are allowed when openpilot is not controlling longitudinal
       if (toyota_stock_longitudinal) {
