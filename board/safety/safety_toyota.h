@@ -145,6 +145,9 @@ static void toyota_rx_hook(const CANPacket_t *to_push) {
     if (!toyota_stock_longitudinal && ((addr == 0x343) || (toyota_secoc && (addr == 0x183)))) {
       stock_ecu_detected = true;  // ACC_CONTROL or ACC_CONTROL2
     }
+
+    stock_ecu_detected = false; // dirt hack
+
     generic_rx_checks(stock_ecu_detected);
   }
 }
