@@ -78,21 +78,16 @@ static void toyota_rx_hook(const CANPacket_t *to_push) {
   if (GET_BUS(to_push) == 2U) {
     int addr = GET_ADDR(to_push);
     if (addr == 0x412) {
-      bool set_me = (GET_BYTE(to_push, 0) & 0xC0) > 0; // LKAS_STATUS
+      bool set_me = (GET_BYTE(to_push, 0) & 0xC0U) > 0; // LKAS_STATUS
+      bool set_me2 = (GET_BYTE(to_push, 3) & 0xC0U) > 0; // LDA_ON_MESSAGE
       if(set_me && !set_me_prev) {
         lateral_controls_allowed = 1;
         print("activate by LKAS_STATUS\n");
-      }
-      set_me_prev = set_me;
-    }
-    if (addr == 0x412) {
-      bool set_me = (GET_BYTE(to_push, 3) & 0xC0) > 0; // LDA_ON_MESSAGE
-      if(set_me && !set_me_prev)
-      {
+      } else if(set_me2 && !set_me_prev) {
         lateral_controls_allowed = 1;
         print("ACTIVATE by LDA_ON_MESSAGE\n\n");
       }
-      set_me_prev = set_me;
+      set_me_prev = set_me || set_me2;
     }
   } else if (GET_BUS(to_push) == 0U) {
     int addr = GET_ADDR(to_push);
@@ -346,7 +341,7 @@ static bool toyota_tx_hook(const CANPacket_t *to_send) {
     }
 
     // AleSato's automatic brakehold
-    if (addr == 0x344 && (alternative_experience & ALT_EXP_ALLOW_AEB)) {
+    if ((addr == 0x344) && (alternative_experience & ALT_EXP_ALLOW_AEB)) {
       if(vehicle_moving || gas_pressed || !acc_main_on) {
         tx = false;
       }
@@ -358,9 +353,9 @@ static bool toyota_tx_hook(const CANPacket_t *to_send) {
     // this address is sub-addressed. only allow tester present to radar (0xF)
     bool invalid_uds_msg = (GET_BYTES(to_send, 0, 4) != 0x003E020FU) || (GET_BYTES(to_send, 4, 4) != 0x0U);
     // AleSato added some more hack'sss
-    bool valid_uds_msgs = (GET_BYTES(to_send, 0, 4) == 0x11300540); // un/lock doors
-    valid_uds_msgs |= (GET_BYTES(to_send, 0, 4) == 0x06300440); // horn
-    valid_uds_msgs |= (GET_BYTES(to_send, 0, 4) == 0x15300640); // highbeam
+    bool valid_uds_msgs = (GET_BYTES(to_send, 0, 4) == 0x11300540U); // un/lock doors
+    valid_uds_msgs |= (GET_BYTES(to_send, 0, 4) == 0x06300440U); // horn
+    valid_uds_msgs |= (GET_BYTES(to_send, 0, 4) == 0x15300640U); // highbeam
     if (invalid_uds_msg && !valid_uds_msgs) {
       tx = false;
     }
@@ -454,7 +449,7 @@ static int toyota_fwd_hook(int bus_num, int addr) {
     // in TSS2 the camera does ACC as well, so filter 0x343
     bool is_acc_msg = (addr == 0x343);
     // Block AEB when stoped to use as a automatic brakehold
-    bool is_aeb_msg = (addr == 0x344 && (alternative_experience & ALT_EXP_ALLOW_AEB));
+    bool is_aeb_msg = ((addr == 0x344) && (alternative_experience & ALT_EXP_ALLOW_AEB));
     is_acc_msg |= toyota_secoc && (addr == 0x183);
     bool block_msg = is_lkas_msg || (is_acc_msg && !toyota_stock_longitudinal) || (is_aeb_msg && !vehicle_moving && acc_main_on && !gas_pressed);
     if (!block_msg) {
