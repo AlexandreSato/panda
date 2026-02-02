@@ -118,6 +118,7 @@ static void tick_handler(void) {
   static uint32_t controls_allowed_countdown = 0;
   static uint8_t prev_harness_status = HARNESS_STATUS_NC;
   static uint8_t loop_counter = 0U;
+  static uint32_t spam_counter = 0;
 
   if (TICK_TIMER->SR != 0U) {
 
@@ -143,6 +144,24 @@ static void tick_handler(void) {
 
     // decimated to 1Hz
     if (loop_counter == 0U) {
+      if (spam_counter % 3 == 0) {  // Every 3 seconds
+        CANPacket_t pkt = {0};
+        pkt.addr = 0x123;
+        pkt.bus = 0;
+        pkt.data_len_code = 8;      // 8 byte
+        pkt.returned = 0;
+        pkt.rejected = 0;
+        pkt.extended = 0;
+        pkt.fd = 0;
+
+        // static payload
+        memcpy(pkt.data, "\xDE\xAD\xBE\xEF\xCA\xFE\xBA\xBE", 8);
+
+        can_set_checksum(&pkt);
+        can_send(&pkt, 0, true);    // skip_tx_hook = true
+      }
+      spam_counter++;
+
       can_live = pending_can_live;
 
       //puth(usart1_dma); print(" "); puth(DMA2_Stream5->M0AR); print(" "); puth(DMA2_Stream5->NDTR); print("\n");
@@ -305,8 +324,8 @@ int main(void) {
     fan_init();
   }
 
-  // init to SILENT and can silent
-  set_safety_mode(SAFETY_SILENT, 0U);
+  // init to ALLOUTPUT and can silent
+  set_safety_mode(SAFETY_ALLOUTPUT, 0U);
 
   // enable CAN TXs
   enable_can_transceivers(true);
